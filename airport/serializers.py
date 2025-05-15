@@ -1,6 +1,15 @@
 from rest_framework import serializers
 
-from airport.models import Crew, Order, AirplaneType, Airplane, Airport, Route, Flight, Ticket
+from airport.models import (
+    Crew,
+    Order,
+    AirplaneType,
+    Airplane,
+    Airport,
+    Route,
+    Flight,
+    Ticket,
+)
 
 
 class CrewSerializer(serializers.ModelSerializer):
@@ -18,18 +27,16 @@ class OrderSerializer(serializers.ModelSerializer):
 class AirplaneTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AirplaneType
-        fields = ("id", "name",)
+        fields = (
+            "id",
+            "name",
+        )
 
 
 class AirplaneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airplane
-        fields = (
-            "id",
-            "name",
-            "seat_in_row",
-            "airplane_type"
-        )
+        fields = ("id", "name", "seat_in_row", "airplane_type")
 
 
 class AirportSerializer(serializers.ModelSerializer):
@@ -38,45 +45,24 @@ class AirportSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "closest_big_city")
 
 
-class RouteSerialize(serializers.ModelSerializer):
+class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
-        fields = (
-            "id",
-            "source",
-            "destination",
-            "distance"
-        )
+        fields = ("id", "source", "destination", "distance")
 
 
 class FlightSerializer(serializers.ModelSerializer):
     class Meta:
         model = Flight
-        fields = (
-            "id",
-            "route",
-            "airplane",
-            "departure_time",
-            "arrival_time"
-        )
+        fields = ("id", "route", "airplane", "departure_time", "arrival_time")
 
 
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
-        fields = (
-            "id",
-            "row",
-            "seat",
-            "flight",
-            "order"
-        )
+        fields = ("id", "row", "seat", "flight", "order")
 
     def validate(self, attrs):
         data = super(TicketSerializer, self).validate(attrs=attrs)
-        Ticket.validate_ticket(
-            attrs["row"],
-            attrs["seat"],
-            attrs["airplane"]
-        )
+        Ticket.validate_ticket(attrs["row"], attrs["seat"], attrs["airplane"])
         return data
