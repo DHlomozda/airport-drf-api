@@ -46,13 +46,13 @@ class AirplaneType(models.Model):
 class Airplane(models.Model):
     name = models.CharField(max_length=50)
     rows = models.IntegerField()
-    seat_in_row = models.IntegerField()
+    seats_in_row = models.IntegerField()
     airplane_type = models.ForeignKey(
         AirplaneType, on_delete=models.CASCADE, related_name="airplanes"
     )
 
     def __str__(self):
-        return f"{self.name} ({self.rows}, {self.seat_in_row})"
+        return f"{self.name} ({self.rows}, {self.seats_in_row})"
 
 
 class Airport(models.Model):
@@ -97,7 +97,7 @@ class Ticket(models.Model):
     def validate_ticket(row, seat, airplane):
         for ticket_attr_value, ticket_attr_name, airplane_attr_name in [
             (row, "row", "rows"),
-            (seat, "seat", "seat_in_row"),
+            (seat, "seat", "seats_in_row"),
         ]:
             count_attr = getattr(airplane, airplane_attr_name)
             if not (1 <= ticket_attr_value <= count_attr):

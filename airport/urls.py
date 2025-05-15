@@ -12,7 +12,7 @@ from airport.views import (
     TicketViewSet,
 )
 
-app_name = "airport_api"
+app_name = "airport"
 
 router = routers.DefaultRouter()
 router.register("crews", CrewViewSet)

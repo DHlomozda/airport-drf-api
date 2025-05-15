@@ -36,5 +36,5 @@ urlpatterns = [
     ),
     path("api/doc/redoc/", SpectacularRedocView.as_view(url_name="schema")),
     path("__debug__/", include("debug_toolbar.urls")),
-    path("api/airport/", include("airport.urls", namespace="airport_api")),
+    path("api/", include("airport.urls", namespace="airport")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

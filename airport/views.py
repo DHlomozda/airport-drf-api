@@ -1,7 +1,7 @@
 from django.db.models import F, Count
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
 from airport.models import (
@@ -51,7 +51,7 @@ class CrewViewSet(viewsets.ModelViewSet):
         detail=True,
         url_path="upload-image",
         permission_classes=[
-            IsAuthenticated,
+            IsAdminUser,
         ],
     )
     def upload_image(self, request, pk=None):
@@ -71,6 +71,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
+        if self.request.user.is_staff:
+            return Order.objects.all()
         return Order.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
@@ -89,7 +91,7 @@ class AirplaneTypeViewSet(viewsets.ModelViewSet):
 
 
 class AirplaneViewSet(viewsets.ModelViewSet):
-    queryset = Airplane.objects.all()
+    queryset = Airplane.objects.all().select_related("airplane_type")
     serializer_class = AirplaneSerializer
     permission_classes = (IsAdminOrReadOnly,)
 
@@ -142,7 +144,7 @@ class FlightViewSet(viewsets.ModelViewSet):
             )
             .annotate(
                 tickets_available=(
-                    F("airplane__rows") * F("airplane__seat_in_row") - Count("tickets")
+                    F("airplane__rows") * F("airplane__seats_in_row") - Count("tickets")
                 )
             )
         )
@@ -155,10 +157,12 @@ class FlightViewSet(viewsets.ModelViewSet):
             route_id = int(route)
             queryset = queryset.filter(route__id=route_id)
         if source:
-            queryset = queryset.filter(route__source__closet_big_city__icontains=source)
+            queryset = queryset.filter(
+                route__source__closest_big_city__icontains=source
+            )
         if destination:
             queryset = queryset.filter(
-                route__destination__closet_big_city__icontains=destination
+                route__destination__closest_big_city__icontains=destination
             )
         return queryset
 
@@ -166,7 +170,7 @@ class FlightViewSet(viewsets.ModelViewSet):
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
         if self.action == "list":
