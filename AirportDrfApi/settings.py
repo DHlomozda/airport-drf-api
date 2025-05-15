@@ -144,7 +144,7 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "static"
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = "/files/media"
 
 DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": lambda *args: True,

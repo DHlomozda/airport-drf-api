@@ -108,6 +108,17 @@ class AirportViewSet(viewsets.ModelViewSet):
     serializer_class = AirportSerializer
     permission_classes = (IsAdminOrReadOnly,)
 
+    def get_queryset(self):
+        name = self.request.query_params.get("name")
+        closest_big_city = self.request.query_params.get("closest_big_city")
+        if name:
+            self.queryset = self.queryset.filter(name__icontains=name)
+        if closest_big_city:
+            self.queryset = self.queryset.filter(
+                closest_big_city__icontains=closest_big_city
+            )
+        return self.queryset
+
 
 class RouteViewSet(viewsets.ModelViewSet):
     queryset = Route.objects.all()
@@ -170,7 +181,7 @@ class FlightViewSet(viewsets.ModelViewSet):
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action == "list":
