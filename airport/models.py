@@ -1,11 +1,23 @@
+import os
+import uuid
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.text import slugify
+
+
+def crew_image_upload(instance, filename):
+    _, extension = os.path.splitext(filename)
+    filename = f"{slugify(instance.full_name)}-{uuid.uuid4()}{extension}"
+
+    return os.path.join("uploads/crews/", filename)
 
 
 class Crew(models.Model):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
+    image = models.ImageField(null=True, upload_to="crew_image_upload")
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -16,6 +28,9 @@ class Order(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders"
     )
+
+    class Meta:
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"{self.created_at}, {self.user}"
@@ -41,7 +56,7 @@ class Airplane(models.Model):
 
 
 class Airport(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=255)
     closest_big_city = models.CharField(max_length=69)
 
     def __str__(self):
@@ -66,6 +81,7 @@ class Flight(models.Model):
     )
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
+    crews = models.ManyToManyField(Crew, related_name="flights", blank=True)
 
     def __str__(self):
         return f"{self.arrival_time} - {self.departure_time}"
