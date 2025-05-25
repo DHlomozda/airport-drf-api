@@ -15,14 +15,18 @@ from airport.views import (
 app_name = "airport"
 
 router = routers.DefaultRouter()
-router.register("crews", CrewViewSet)
-router.register("orders", OrderViewSet)
-router.register("airplaneTypes", AirplaneTypeViewSet)
-router.register("airplanes", AirplaneViewSet)
-router.register("airports", AirportViewSet)
-router.register("routes", RouteViewSet)
-router.register("flights", FlightViewSet)
-router.register("tickets", TicketViewSet)
+router.register("crews", CrewViewSet, basename="crew")
+router.register("orders", OrderViewSet, basename="order")
+router.register(
+    "airplaneTypes",
+    AirplaneTypeViewSet,
+    basename="airplaneTypes"
+)
+router.register("airplanes", AirplaneViewSet, basename="airplane")
+router.register("airports", AirportViewSet, basename="airport")
+router.register("routes", RouteViewSet, basename="route")
+router.register("flights", FlightViewSet, basename="flight")
+router.register("tickets", TicketViewSet, basename="ticket")
 
 
 urlpatterns = [path("", include(router.urls))]

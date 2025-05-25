@@ -2,7 +2,7 @@ import os
 import uuid
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
 
@@ -127,7 +127,7 @@ class Ticket(models.Model):
         )
 
     def __str__(self):
-        return f"{self.flight}: (row: {self.row}, seat: {self.seat}"
+        return f"{self.flight}: (row: {self.row}, seat: {self.seat})"
 
     class Meta:
         unique_together = ("flight", "row", "seat")

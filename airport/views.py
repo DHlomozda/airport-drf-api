@@ -1,5 +1,5 @@
 from django.db.models import F, Count
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -65,15 +65,20 @@ class CrewViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         if self.request.user.is_staff:
-            return Order.objects.all()
-        return Order.objects.filter(user=self.request.user)
+            return Order.objects.all().order_by("-created_at")
+        return Order.objects.filter(user=self.request.user).order_by("-created_at")
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -151,7 +156,7 @@ class FlightViewSet(viewsets.ModelViewSet):
                 "route", "route__source", "route__destination", "airplane"
             )
             .prefetch_related(
-                "crews",
+                "crews", "tickets"
             )
             .annotate(
                 tickets_available=(
@@ -175,7 +180,7 @@ class FlightViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(
                 route__destination__closest_big_city__icontains=destination
             )
-        return queryset
+        return queryset.distinct()
 
 
 class TicketViewSet(viewsets.ModelViewSet):

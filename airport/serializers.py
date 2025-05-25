@@ -105,7 +105,7 @@ class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = ("id", "row", "seat", "flight", "order")
-
+        read_only_fields = ("order", )
     def validate(self, attrs):
         data = super(TicketSerializer, self).validate(attrs=attrs)
         Ticket.validate_ticket(attrs["row"], attrs["seat"], attrs["flight"].airplane)
@@ -145,7 +145,6 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         with transaction.atomic():
             tickets_data = validated_data.pop("tickets")
-            print("DEBUG: tickets_data ->", tickets_data)
             order = Order.objects.create(**validated_data)
             for ticket_data in tickets_data:
                 ticket_data.pop("order", None)
