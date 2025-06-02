@@ -1,0 +1,7 @@
+openapi: 3.0.3
+info:
+  title: Airport API
+  version: 1.0.0
+  description: Best service for good people
+paths: {}
+components: {}

@@ -3,7 +3,11 @@ from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
+from drf_spectacular.types import OpenApiTypes
 
+from airport.docs_schemas import crew_upload_image_schema, crew_list_schema, crew_create_schema, crew_retrieve_schema, \
+    crew_update_schema, crew_partial_update_schema, crew_destroy_schema
 from airport.models import (
     Crew,
     Order,
@@ -36,16 +40,37 @@ from airport.serializers import (
 )
 
 
+@extend_schema_view(
+    list=crew_list_schema,
+    create=crew_create_schema,
+    retrieve=crew_retrieve_schema,
+    update=crew_update_schema,
+    partial_update=crew_partial_update_schema,
+    destroy=crew_destroy_schema,
+)
 class CrewViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows viewing and editing of crew members.
+
+    This ViewSet provides standard CRUD operations for the Crew model,
+    and includes a custom action for image uploads.
+    """
     queryset = Crew.objects.all()
     serializer_class = CrewSerializer
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_serializer_class(self):
+        """
+        Returns a different serializer class based on the action being performed.
+
+        Specifically, it uses CrewImageSerializer for the 'upload_image' action
+        and defaults to CrewSerializer for all other actions.
+        """
         if self.action == "upload_image":
             return CrewImageSerializer
         return CrewSerializer
 
+    @crew_upload_image_schema
     @action(
         methods=["POST"],
         detail=True,
@@ -112,6 +137,18 @@ class AirportViewSet(viewsets.ModelViewSet):
     queryset = Airport.objects.all()
     serializer_class = AirportSerializer
     permission_classes = (IsAdminOrReadOnly,)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "name",
+                type={"type": "string"},
+                description="Filter by name (example: ?name=Boeing)",
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         name = self.request.query_params.get("name")

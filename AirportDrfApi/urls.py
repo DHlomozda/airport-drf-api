@@ -27,6 +27,10 @@ from drf_spectacular.views import (
 
 urlpatterns = [
     path(
+       "api/",
+       include("airport.urls", namespace="airport")
+    ),
+    path(
         "admin/",
         admin.site.urls
     ),
@@ -52,8 +56,5 @@ urlpatterns = [
         "__debug__/",
         include("debug_toolbar.urls")
     ),
-    path(
-        "api/",
-        include("airport.urls", namespace="airport")
-    ),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
