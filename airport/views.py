@@ -3,11 +3,7 @@ from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
-from drf_spectacular.types import OpenApiTypes
 
-from airport.docs_schemas import crew_upload_image_schema, crew_list_schema, crew_create_schema, crew_retrieve_schema, \
-    crew_update_schema, crew_partial_update_schema, crew_destroy_schema
 from airport.models import (
     Crew,
     Order,
@@ -19,6 +15,68 @@ from airport.models import (
     Ticket,
 )
 from airport.permissions import IsAdminOrReadOnly
+from airport.schemas.airplane_schema import (
+    airplane_list_schema,
+    airplane_create_schema,
+    airplane_retrieve_schema,
+    airplane_update_schema,
+    airplane_partial_update_schema,
+    airplane_destroy_schema
+)
+from airport.schemas.airplane_type_schema import (
+    airplane_type_partial_update_schema,
+    airplane_type_update_schema,
+    airplane_type_destroy_schema,
+    airplane_type_retrieve_schema,
+    airplane_type_create_schema,
+    airplane_type_list_schema
+)
+from airport.schemas.airport_schema import (
+    airport_list_schema,
+    airport_create_schema,
+    airport_retrieve_schema,
+    airport_update_schema,
+    airport_partial_update_schema,
+    airport_destroy_schema
+)
+from airport.schemas.crew_schema import (
+    crew_upload_image_schema,
+    crew_list_schema,
+    crew_create_schema,
+    crew_retrieve_schema,
+    crew_update_schema,
+    crew_partial_update_schema,
+    crew_delete_schema
+)
+from airport.schemas.flight_schema import (
+    flight_list_schema,
+    flight_create_schema,
+    flight_retrieve_schema,
+    flight_update_schema,
+    flight_partial_update_schema,
+    flight_destroy_schema
+)
+from airport.schemas.order_schema import (
+    order_list_schema,
+    order_create_schema,
+    order_retrieve_schema
+)
+from airport.schemas.route_schema import (
+    route_destroy_schema,
+    route_partial_update_schema,
+    route_update_schema,
+    route_retrieve_schema,
+    route_create_schema,
+    route_list_schema
+)
+from airport.schemas.ticket_schema import (
+    ticket_list_schema,
+    ticket_create_schema,
+    ticket_retrieve_schema,
+    ticket_update_schema,
+    ticket_partial_update_schema,
+    ticket_destroy_schema
+)
 from airport.serializers import (
     CrewSerializer,
     OrderSerializer,
@@ -40,35 +98,57 @@ from airport.serializers import (
 )
 
 
-@extend_schema_view(
-    list=crew_list_schema,
-    create=crew_create_schema,
-    retrieve=crew_retrieve_schema,
-    update=crew_update_schema,
-    partial_update=crew_partial_update_schema,
-    destroy=crew_destroy_schema,
-)
 class CrewViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows viewing and editing of crew members.
-
-    This ViewSet provides standard CRUD operations for the Crew model,
-    and includes a custom action for image uploads.
-    """
     queryset = Crew.objects.all()
     serializer_class = CrewSerializer
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_serializer_class(self):
-        """
-        Returns a different serializer class based on the action being performed.
-
-        Specifically, it uses CrewImageSerializer for the 'upload_image' action
-        and defaults to CrewSerializer for all other actions.
-        """
         if self.action == "upload_image":
             return CrewImageSerializer
         return CrewSerializer
+
+    @crew_list_schema
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves a list of all crews.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @crew_create_schema
+    def create(self, request, *args, **kwargs):
+        """
+        Creates a new crew. Only accessible to administrators.
+        """
+        return super().create(request, *args, **kwargs)
+
+    @crew_retrieve_schema
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves details of a specific crew by ID.
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+    @crew_update_schema
+    def update(self, request, *args, **kwargs):
+        """
+        Updates all fields of a specific crew by ID.
+        """
+        return super().update(request, *args, **kwargs)
+
+    @crew_partial_update_schema
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Partially updates some fields of a specific crew by ID.
+        """
+        return super().partial_update(request, *args, **kwargs)
+
+    @crew_delete_schema
+    def destroy(self, request, *args, **kwargs):
+        """
+        Deletes a specific crew by ID.
+        """
+        return super().destroy(request, *args, **kwargs)
 
     @crew_upload_image_schema
     @action(
@@ -113,11 +193,75 @@ class OrderViewSet(
             return OrderListSerializer
         return OrderSerializer
 
+    @order_list_schema
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves a list of all orders.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @order_create_schema
+    def create(self, request, *args, **kwargs):
+        """
+        Creates a new order. Only accessible to administrators.
+        """
+        return super().create(request, *args, **kwargs)
+
+    @order_retrieve_schema
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves details of a specific order by ID.
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+
 
 class AirplaneTypeViewSet(viewsets.ModelViewSet):
     queryset = AirplaneType.objects.all()
     serializer_class = AirplaneTypeSerializer
     permission_classes = (IsAdminOrReadOnly,)
+
+    @airplane_type_list_schema
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves a list of all airplane_type.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @airplane_type_create_schema
+    def create(self, request, *args, **kwargs):
+        """
+        Creates a new airplane_type. Only accessible to administrators.
+        """
+        return super().create(request, *args, **kwargs)
+
+    @airplane_type_retrieve_schema
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves details of a specific airplane_type by ID.
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+    @airplane_type_update_schema
+    def update(self, request, *args, **kwargs):
+        """
+        Updates all fields of a specific airplane_type by ID.
+        """
+        return super().update(request, *args, **kwargs)
+
+    @airplane_type_partial_update_schema
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Partially updates some fields of a specific airplane_type by ID.
+        """
+        return super().partial_update(request, *args, **kwargs)
+
+    @airplane_type_destroy_schema
+    def destroy(self, request, *args, **kwargs):
+        """
+        Deletes a specific airplane_type by ID.
+        """
+        return super().destroy(request, *args, **kwargs)
 
 
 class AirplaneViewSet(viewsets.ModelViewSet):
@@ -132,23 +276,59 @@ class AirplaneViewSet(viewsets.ModelViewSet):
             return AirplaneDetailSerializer
         return AirplaneSerializer
 
+    @airplane_list_schema
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves a list of airplanes.
+        Uses AirplaneListSerializer for list representation.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @airplane_create_schema
+    def create(self, request, *args, **kwargs):
+        """
+        Creates a new airplane.
+        Only administrators are allowed.
+        """
+        return super().create(request, *args, **kwargs)
+
+    @airplane_retrieve_schema
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves details of a specific airplane by ID.
+        Uses AirplaneDetailSerializer for detailed representation.
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+    @airplane_update_schema
+    def update(self, request, *args, **kwargs):
+        """
+        Fully updates an existing airplane.
+        Only administrators are allowed.
+        """
+        return super().update(request, *args, **kwargs)
+
+    @airplane_partial_update_schema
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Partially updates selected fields of an airplane.
+        Only administrators are allowed.
+        """
+        return super().partial_update(request, *args, **kwargs)
+
+    @airplane_destroy_schema
+    def destroy(self, request, *args, **kwargs):
+        """
+        Deletes an airplane by ID.
+        Only administrators are allowed.
+        """
+        return super().destroy(request, *args, **kwargs)
+
 
 class AirportViewSet(viewsets.ModelViewSet):
     queryset = Airport.objects.all()
     serializer_class = AirportSerializer
     permission_classes = (IsAdminOrReadOnly,)
-
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "name",
-                type={"type": "string"},
-                description="Filter by name (example: ?name=Boeing)",
-            ),
-        ]
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         name = self.request.query_params.get("name")
@@ -161,6 +341,52 @@ class AirportViewSet(viewsets.ModelViewSet):
             )
         return self.queryset
 
+    @airport_list_schema
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves a list of airports.
+        Supports filtering by name and closest_big_city.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @airport_create_schema
+    def create(self, request, *args, **kwargs):
+        """
+        Creates a new airport.
+        Only administrators are allowed.
+        """
+        return super().create(request, *args, **kwargs)
+
+    @airport_retrieve_schema
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves details of a specific airport by ID.
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+    @airport_update_schema
+    def update(self, request, *args, **kwargs):
+        """
+        Fully updates an existing airport.
+        Only administrators are allowed.
+        """
+        return super().update(request, *args, **kwargs)
+
+    @airport_partial_update_schema
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Partially updates selected fields of an airport.
+        Only administrators are allowed.
+        """
+        return super().partial_update(request, *args, **kwargs)
+
+    @airport_destroy_schema
+    def destroy(self, request, *args, **kwargs):
+        """
+        Deletes an airport by ID.
+        Only administrators are allowed.
+        """
+        return super().destroy(request, *args, **kwargs)
 
 class RouteViewSet(viewsets.ModelViewSet):
     queryset = Route.objects.all()
@@ -174,6 +400,53 @@ class RouteViewSet(viewsets.ModelViewSet):
             return RouteDetailSerializer
         return RouteSerializer
 
+    @route_list_schema
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves a list of routes.
+        Supports filtering by name and closest_big_city.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @route_create_schema
+    def create(self, request, *args, **kwargs):
+        """
+        Creates a new route.
+        Only administrators are allowed.
+        """
+        return super().create(request, *args, **kwargs)
+
+    @route_retrieve_schema
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves details of a specific route by ID.
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+    @route_update_schema
+    def update(self, request, *args, **kwargs):
+        """
+        Fully updates an existing route.
+        Only administrators are allowed.
+        """
+        return super().update(request, *args, **kwargs)
+
+    @route_partial_update_schema
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Partially updates selected fields of a route.
+        Only administrators are allowed.
+        """
+        return super().partial_update(request, *args, **kwargs)
+
+    @route_destroy_schema
+    def destroy(self, request, *args, **kwargs):
+        """
+        Deletes a route by ID.
+        Only administrators are allowed.
+        """
+        return super().destroy(request, *args, **kwargs)
+
 
 class FlightViewSet(viewsets.ModelViewSet):
     queryset = Flight.objects.all()
@@ -186,6 +459,48 @@ class FlightViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return FlightDetailSerializer
         return FlightSerializer
+
+    @flight_list_schema
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves a list of all flights.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @flight_create_schema
+    def create(self, request, *args, **kwargs):
+        """
+        Creates a new flight. Only accessible to administrators.
+        """
+        return super().create(request, *args, **kwargs)
+
+    @flight_retrieve_schema
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves details of a specific flight by ID.
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+    @flight_update_schema
+    def update(self, request, *args, **kwargs):
+        """
+        Updates all fields of a specific flight by ID.
+        """
+        return super().update(request, *args, **kwargs)
+
+    @flight_partial_update_schema
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Partially updates some fields of a specific flight by ID.
+        """
+        return super().partial_update(request, *args, **kwargs)
+
+    @flight_destroy_schema
+    def destroy(self, request, *args, **kwargs):
+        """
+        Deletes a specific flight by ID.
+        """
+        return super().destroy(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = (
@@ -229,3 +544,45 @@ class TicketViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             return TicketListSerializer
         return TicketSerializer
+
+    @ticket_list_schema
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves a list of all tickets.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @ticket_create_schema
+    def create(self, request, *args, **kwargs):
+        """
+        Creates a new ticket. Only accessible to administrators.
+        """
+        return super().create(request, *args, **kwargs)
+
+    @ticket_retrieve_schema
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves details of a specific ticket by ID.
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+    @ticket_update_schema
+    def update(self, request, *args, **kwargs):
+        """
+        Updates all fields of a specific ticket by ID.
+        """
+        return super().update(request, *args, **kwargs)
+
+    @ticket_partial_update_schema
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Partially updates some fields of a specific ticket by ID.
+        """
+        return super().partial_update(request, *args, **kwargs)
+
+    @ticket_destroy_schema
+    def destroy(self, request, *args, **kwargs):
+        """
+        Deletes a specific ticket by ID.
+        """
+        return super().destroy(request, *args, **kwargs)
