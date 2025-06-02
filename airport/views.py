@@ -15,6 +15,10 @@ from airport.models import (
     Ticket,
 )
 from airport.permissions import IsAdminOrReadOnly
+from airport.crew_schema import (
+    crew_upload_image_schema, crew_list_schema, crew_create_schema, crew_retrieve_schema, crew_update_schema,
+    crew_partial_update_schema, crew_delete_schema
+)
 from airport.serializers import (
     CrewSerializer,
     OrderSerializer,
@@ -46,6 +50,49 @@ class CrewViewSet(viewsets.ModelViewSet):
             return CrewImageSerializer
         return CrewSerializer
 
+    @crew_list_schema
+    def list(self, request, *args, **kwargs):
+        """
+        Retrieves a list of all crews.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @crew_create_schema
+    def create(self, request, *args, **kwargs):
+        """
+        Creates a new crew. Only accessible to administrators.
+        """
+        return super().create(request, *args, **kwargs)
+
+    @crew_retrieve_schema
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves details of a specific crew by ID.
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+    @crew_update_schema
+    def update(self, request, *args, **kwargs):
+        """
+        Updates all fields of a specific crew by ID.
+        """
+        return super().update(request, *args, **kwargs)
+
+    @crew_partial_update_schema
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Partially updates some fields of a specific crew by ID.
+        """
+        return super().partial_update(request, *args, **kwargs)
+
+    @crew_delete_schema
+    def destroy(self, request, *args, **kwargs):
+        """
+        Deletes a specific crew by ID.
+        """
+        return super().destroy(request, *args, **kwargs)
+
+    @crew_upload_image_schema
     @action(
         methods=["POST"],
         detail=True,
@@ -54,7 +101,7 @@ class CrewViewSet(viewsets.ModelViewSet):
             IsAdminUser,
         ],
     )
-    def upload_image(self, request, pk=None):
+    def upload_image(self, request):
         crew = self.get_object()
         serializer = self.get_serializer(crew, data=request.data)
 

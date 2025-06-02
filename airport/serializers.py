@@ -20,6 +20,7 @@ class CrewSerializer(serializers.ModelSerializer):
 
 
 class CrewImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField()
     class Meta:
         model = Crew
         fields = ("id", "image")
