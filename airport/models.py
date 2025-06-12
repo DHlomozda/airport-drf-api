@@ -1,0 +1,134 @@
+import os
+import uuid
+
+from django.conf import settings
+from rest_framework.exceptions import ValidationError
+from django.db import models
+from django.utils.text import slugify
+
+
+def crew_image_upload(instance, filename):
+    _, extension = os.path.splitext(filename)
+    filename = f"{slugify(instance.full_name)}-{uuid.uuid4()}{extension}"
+
+    return os.path.join("uploads/crews/", filename)
+
+
+class Crew(models.Model):
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    image = models.ImageField(null=True, upload_to="crew_image_upload")
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
+
+class Order(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders"
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.created_at}, {self.user}"
+
+
+class AirplaneType(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
+
+class Airplane(models.Model):
+    name = models.CharField(max_length=50)
+    rows = models.IntegerField()
+    seats_in_row = models.IntegerField()
+    airplane_type = models.ForeignKey(
+        AirplaneType, on_delete=models.CASCADE, related_name="airplanes"
+    )
+
+    def __str__(self):
+        return f"{self.name} ({self.rows}, {self.seats_in_row})"
+
+
+class Airport(models.Model):
+    name = models.CharField(max_length=255)
+    closest_big_city = models.CharField(max_length=69)
+
+    def __str__(self):
+        return self.name
+
+
+class Route(models.Model):
+    source = models.ForeignKey(Airport, models.CASCADE, related_name="source_routes")
+    destination = models.ForeignKey(
+        Airport, models.CASCADE, related_name="destination_routes"
+    )
+    distance = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.source} - {self.destination}"
+
+
+class Flight(models.Model):
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name="flights")
+    airplane = models.ForeignKey(
+        Airplane, on_delete=models.CASCADE, related_name="airplanes"
+    )
+    departure_time = models.DateTimeField()
+    arrival_time = models.DateTimeField()
+    crews = models.ManyToManyField(Crew, related_name="flights", blank=True)
+
+    def __str__(self):
+        return f"{self.arrival_time} - {self.departure_time}"
+
+
+class Ticket(models.Model):
+    row = models.IntegerField()
+    seat = models.IntegerField()
+    flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name="tickets")
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tickets")
+
+    @staticmethod
+    def validate_ticket(row, seat, airplane):
+        for ticket_attr_value, ticket_attr_name, airplane_attr_name in [
+            (row, "row", "rows"),
+            (seat, "seat", "seats_in_row"),
+        ]:
+            count_attr = getattr(airplane, airplane_attr_name)
+            if not (1 <= ticket_attr_value <= count_attr):
+                raise ValidationError(
+                    {
+                        ticket_attr_name: f"{ticket_attr_name} "
+                        f"number must be in available range: "
+                        f"(1, {airplane_attr_name}): "
+                        f"(1, {count_attr})"
+                    }
+                )
+
+    def clean(self):
+        Ticket.validate_ticket(self.row, self.seat, self.flight.airplane)
+
+    def save(
+        self,
+        *args,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        self.full_clean()
+        return super(Ticket, self).save(
+            force_insert, force_update, using, update_fields
+        )
+
+    def __str__(self):
+        return f"{self.flight}: (row: {self.row}, seat: {self.seat})"
+
+    class Meta:
+        unique_together = ("flight", "row", "seat")
+        ordering = ["row", "seat"]

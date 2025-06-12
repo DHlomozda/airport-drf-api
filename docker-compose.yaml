@@ -1,0 +1,37 @@
+services:
+    app:
+        build:
+            context: .
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./:/app
+            - my_media:/files/media
+            - my_static:/files/static
+        command: >
+            sh -c "python manage.py migrate &&
+                    python manage.py runserver 0.0.0.0:8000"
+        env_file:
+            - .env
+        depends_on:
+            db:
+                condition: service_healthy
+
+    db:
+        image: postgres:14.13-bookworm
+        ports:
+            - "5433:5432"
+        restart: always
+        env_file:
+            - .env
+        volumes:
+            - postgres_data:$PGDATA
+        healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+          interval: 2s
+          timeout: 1s
+          retries: 5
+volumes:
+    postgres_data:
+    my_media:
+    my_static:
